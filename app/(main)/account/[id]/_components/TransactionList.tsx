@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
 import MoreInfoToolTip from "@/components/moreInfoToolTip";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -44,19 +43,18 @@ const RECURRING_INTERVALS = {
 type Props = {
   readyTransactionList: serializableTransaction[];
   deleteSingleTransaction: (id: string) => Promise<void>;
-  toggleSelection: (id: string) => void;
-  deleteMultipleTransactions: () => Promise<void>;
-  toggleAllSelection: (value: CheckedState) => void;
-  handleFilter: (
-    filterType: keyof filterState,
-    value?: string | boolean
-  ) => void;
+  // toggleSelection: (id: string) => void;
+  // toggleAllSelection: (value: CheckedState) => void;
+  // handleFilter: (
+  //   filterType: keyof filterState,
+  //   value?: string | boolean
+  // ) => void;
   handleSortConfig: (value: "amount" | "date" | "") => void;
-  checkAll: Dispatch<SetStateAction<boolean>>;
-  allChecked: boolean;
+  // checkAll: Dispatch<SetStateAction<boolean>>;
+  // allChecked: boolean;
   sortState: sortState;
   setSortState: Dispatch<SetStateAction<sortState>>;
-  selection: string[];
+  // selection: string[];
 };
 
 function TransactionList(props: Props) {
@@ -67,12 +65,10 @@ function TransactionList(props: Props) {
           <TableRow className="text-right">
             <TableHead>No</TableHead>
             <TableHead>
-              <Checkbox
-                checked={props.allChecked}
-                onCheckedChange={(value) => props.toggleAllSelection(value)}
-                className="border-gray-400"
+
+              <SelectAllCheckbox
+                allIds={props.readyTransactionList.map((tx) => tx.id)}
               />
-              
             </TableHead>
             <TableHead
               onClick={() => props.handleSortConfig("date")}
@@ -114,11 +110,8 @@ function TransactionList(props: Props) {
               <TableRow key={tx.id}>
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell className="min-w-[20px]">
-                  <Checkbox
-                    checked={props.selection.includes(tx.id)}
-                    onCheckedChange={() => props.toggleSelection(tx.id)}
-                    className="border-gray-400"
-                  />
+                  
+                  <SelectCheckbox id={ tx.id} />
                 </TableCell>
                 <TableCell>{format(new Date(tx.createdAt), "PPpp")}</TableCell>
                 <TableCell>{tx.description}</TableCell>

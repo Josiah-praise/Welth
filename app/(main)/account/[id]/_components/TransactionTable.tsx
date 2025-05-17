@@ -10,8 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-
-
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -25,14 +23,13 @@ import {
   deleteTransactions,
   serializableTransaction,
 } from "@/actions/Transactions";
-import { CheckedState } from "@radix-ui/react-checkbox";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { MemoizedTransactionList } from "./TransactionList";
 import { SearchIcon, Trash2Icon, X } from "lucide-react";
-
-
+import { useSelection } from "./CheckStateProvider";
+import { Label } from "@/components/ui/label";
 
 type expenseType = "INCOME" | "EXPENSE" | "";
 
@@ -53,11 +50,11 @@ function TransactionTable({
   accountDetails: serializableAccountResponseWithTransactionAndCount;
 }) {
   const router = useRouter();
-  const [selection, setSelection] = useState<string[]>([]);
+  const { selectedIds: selection, setSelection } = useSelection();
+
   const [filteredAndSortedTransactions, setTransactions] = useState<
     Array<serializableTransaction>
   >(accountDetails.transactions);
-  const [allChecked, checkAll] = useState<boolean>(false);
   const searchParams = useSearchParams();
   const [searchValue, setSearchValue] = useState(searchParams.get("q") ?? "");
   const [filterState, setFilters] = useState<filterState>({
@@ -70,23 +67,23 @@ function TransactionTable({
     order: "asc",
   });
   const deferredFilterState = useDeferredValue(filterState);
-  const deferredSortState = useDeferredValue(sortState);
+  // const deferredSortState = useDeferredValue(sortState);
   const deferredSearchValue = useDeferredValue(searchValue);
 
   // const debouncedValue = useDebounce(searchValue, 5000);
 
   useEffect(() => {
-  const params = new URLSearchParams(searchParams);
-   
-    if (deferredSearchValue) {
-        if (deferredSearchValue === params.get('q')) return
-        params.set("q", deferredSearchValue);
-      } else {
-        params.delete("q");
-      }
+    const params = new URLSearchParams(searchParams);
 
-      router.replace(`?${params.toString()}`);
-}, [deferredSearchValue, router, searchParams])
+    if (deferredSearchValue) {
+      if (deferredSearchValue === params.get("q")) return;
+      params.set("q", deferredSearchValue);
+    } else {
+      params.delete("q");
+    }
+
+    router.replace(`?${params.toString()}`);
+  }, [deferredSearchValue, router, searchParams]);
 
   const readyTransactionList = useMemo(() => {
     let result;
@@ -127,7 +124,7 @@ function TransactionTable({
 
     // sort the filtered list in asc order
     result.sort((a, b) => {
-      switch (deferredSortState.field) {
+      switch (sortState.field) {
         case "amount":
           const aAmount = a.type === "EXPENSE" ? -a.amount : a.amount;
           const bAmount = b.type === "EXPENSE" ? -b.amount : b.amount;
@@ -143,12 +140,12 @@ function TransactionTable({
       }
     });
 
-    if (deferredSortState.order === "desc") result.reverse();
+    if (sortState.order === "desc") result.reverse();
 
     return result;
   }, [
     deferredSearchValue,
-    deferredSortState,
+    sortState,
     deferredFilterState,
     filteredAndSortedTransactions,
   ]);
@@ -176,9 +173,7 @@ function TransactionTable({
 
   const deleteMultipleTransactions = useCallback(async () => {
     const txsCopy = filteredAndSortedTransactions.slice();
-    const tempTransactions = txsCopy.filter((tx) =>
-      selection.includes(tx.id)
-    );
+    const tempTransactions = txsCopy.filter((tx) => selection.includes(tx.id));
 
     // remove every element in the selection array from the copy
     selection.forEach((id, idx) => {
@@ -224,30 +219,7 @@ function TransactionTable({
         }}`
       );
     }
-  }, [filteredAndSortedTransactions, router, selection]);
-
-  const toggleSelection = useCallback(
-    (id: string) => {
-      if (selection.includes(id))
-        setSelection((selection) => selection.filter(($id) => $id !== id));
-      else setSelection((selection) => [...selection, id]);
-    },
-    [selection]
-  );
-
-  const toggleAllSelection = useCallback(
-    (value: CheckedState) => {
-      if (value) {
-        setSelection(filteredAndSortedTransactions.map((tx) => tx.id));
-        checkAll(true);
-      } else {
-        setSelection([]);
-        checkAll(false);
-      }
-      console.log(value)
-    },
-    [filteredAndSortedTransactions]
-  );
+  }, [filteredAndSortedTransactions, router, selection, setSelection]);
 
   const handleFilter = useCallback(
     (filterType: keyof filterState, value?: string | boolean) => {
@@ -281,7 +253,6 @@ function TransactionTable({
 
   return (
     <div>
-      {/* filter section */}
       <div className="flex gap-4">
         <div className="relative flex-1">
           <SearchIcon
@@ -311,20 +282,20 @@ function TransactionTable({
               <SelectItem value="EXPENSE">Expense</SelectItem>
             </SelectContent>
           </Select>
-          <div className="p-2 border rounded-md flex gap-3 items-center">
+          <Label htmlFor="recurring" className="p-2 border rounded-md flex gap-3 items-center">
             <span className="text-sm text-muted-foreground">recurring</span>
-            <Switch
+            <Switch id="recurring"
               checked={filterState.recurring}
               onCheckedChange={(value) => handleFilter("recurring", value)}
             />
-          </div>
-          <div className="p-2 border rounded-md flex gap-3 items-center">
+          </Label>
+          <Label htmlFor="one-time" className="p-2 border rounded-md flex gap-3 items-center">
             <span className="text-sm text-muted-foreground">one-time</span>
-            <Switch
+            <Switch id="one-time"
               checked={filterState.oneTime}
               onCheckedChange={(value) => handleFilter("oneTime", value)}
             />
-          </div>
+          </Label>
           {(filterState.recurring ||
             filterState.type ||
             filterState.oneTime ||
@@ -350,219 +321,14 @@ function TransactionTable({
         </div>
       </div>
 
-      {/* {readyTransactionList.map(tx => (<div className="border rounded-md" key={tx.id}>
-        <p>{tx.amount.toFixed(2)}</p>
-        <p>{tx.category}</p>
-        <p>{tx.description}</p>
-        <p>{format(new Date(tx.date), 'PP')}</p>
-        <p>{ tx.isRecurring ? 'recurring': 'one-time'}</p>
-      </div>))} */}
-
       <MemoizedTransactionList
         readyTransactionList={readyTransactionList}
-        deleteMultipleTransactions={deleteMultipleTransactions}
-        deleteSingleTransaction={deleteSingleTransaction}
-        toggleAllSelection={toggleAllSelection}
-        toggleSelection={toggleSelection}
-        handleFilter={handleFilter}
+        deleteSingleTransaction={deleteSingleTransaction} 
         handleSortConfig={handleSortConfig}
-        checkAll={checkAll}
-        allChecked={allChecked}
-        sortState={deferredSortState}
+        sortState={sortState}
         setSortState={setSortState}
-        selection={selection}
       />
     </div>
   );
 }
 export default TransactionTable;
-
-// handle filtering by transaction type and isRecurring
-// handle sorting by amount, date
-// handle searching by description and category
-// remember that when deleting, you want to get the sums of the deleted content and alter account balance by it
-
-// for updating url with search value
-// useEffect(() => {
-//   const timeOutId = setTimeout(() => {
-//     const params = new URLSearchParams(searchParams);
-
-//     if (searchValue) {
-//       params.set("q", searchValue);
-//     } else {
-//       params.delete("q");
-//     }
-
-//     router.replace(`?${params.toString()}`);
-//   }, 500);
-
-//   return () => clearTimeout(timeOutId);
-// }, [searchValue, router, searchParams]);
-
-// useEffect(() => {
-//   console.log('deferred:', deferedSearchValue)
-//   console.log('current:', searchValue)
-//   const params = new URLSearchParams(searchParams);
-
-//       if (deferedSearchValue) {
-//         params.set("q", deferedSearchValue);
-//       } else {
-//         params.delete("q");
-//       }
-
-//       router.replace(`?${params.toString()}`);
-// }, [deferedSearchValue])
-
-{
-  /* <div className="border-1 rounded-lg my-8">
-        <Table>
-          <TableHeader>
-            <TableRow className="text-right">
-              <TableHead>No</TableHead>
-              <TableHead>
-                <Checkbox
-                  checked={allChecked}
-
-                onCheckedChange={(value) => toggleAllSelection(value)}
-                  className="border-gray-400"
-                />
-              </TableHead>
-              <TableHead
-                onClick={() => handleSortConfig("date")}
-                className="cursor-pointer"
-              >
-                <div className="flex gap-4 items-center">
-                  <span>Date</span>
-                  {sortState.field === "date" &&
-                    (sortState.order === "asc" ? (
-                      <ChevronUp className="text-muted-foreground w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="text-muted-foreground w-4 h-4" />
-                    ))}
-                </div>
-              </TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead
-                onClick={() => handleSortConfig("amount")}
-                className="cursor-pointer"
-              >
-                <div className="flex gap-4 items-center">
-                  {" "}
-                  Amount{" "}
-                  {sortState.field === "amount" &&
-                    (sortState.order === "asc" ? (
-                      <ChevronUp className="text-muted-foreground w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="text-muted-foreground w-4 h-4" />
-                    ))}
-                </div>
-              </TableHead>
-              <TableHead colSpan={2}>Recurring</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {readyTransactionList.length > 0 ? (
-              readyTransactionList.map((tx, idx) => (
-                <TableRow key={tx.id}>
-                  <TableCell>{idx + 1}</TableCell>
-                  <TableCell className="min-w-[20px]">
-                    <Checkbox
-                      checked={selection.includes(tx.id)}
-                      onCheckedChange={() => toggleSelection(tx.id)}
-                      className="border-gray-400"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {format(new Date(tx.createdAt), "PPpp")}
-                  </TableCell>
-                  <TableCell>{tx.description}</TableCell>
-                  <TableCell>
-                    <Badge
-                      style={{ backgroundColor: categoryColors[tx.category] }}
-                    >
-                      {tx.category}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell
-                    className={`${
-                      tx.type === "EXPENSE" ? "text-red-500" : "text-green-500"
-                    } font-medium`}
-                  >
-                    {tx.type === "EXPENSE" ? "-" : "+"}
-                    {tx.amount}
-                  </TableCell>
-                  <TableCell>
-                    {tx.isRecurring ? (
-                      <MoreInfoToolTip
-                        trigger={
-                          <Badge
-                            variant={"secondary"}
-                            className="bg-purple-200 cursor-pointer hover:bg-purple-300"
-                          >
-                            <RefreshCcw />
-                            {tx.recurringInterval &&
-                              RECURRING_INTERVALS[tx.recurringInterval]}
-                          </Badge>
-                        }
-                        infoText={
-                          <div>
-                            <div>Next Date:</div>
-                            <div>
-                              {tx.nextRecurringDate &&
-                                format(new Date(tx.nextRecurringDate), "PP")}
-                            </div>
-                          </div>
-                        }
-                      />
-                    ) : (
-                      <Badge variant={"secondary"}>
-                        <Clock />
-                        one-time
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant={"ghost"}>
-                          <MoreHorizontal />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-
-                        <DropdownMenuItem>
-                          <Link href={`/transaction/create?edit=${tx.id}`}>
-                            <span>Edit</span>
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <span
-                            className="text-red-500"
-                            onClick={() => deleteSingleTransaction(tx.id)}
-                          >
-                            Delete
-                          </span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center text-muted-foreground"
-                >
-                  {" "}
-                  No transaction
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div> */
-}
