@@ -39,7 +39,7 @@ export default function RootLayout({
             </footer>
           </ClerkThemeProvider>
         </ThemeProvider>
-        <Toaster position={ 'top-right'} />
+        <Toaster position={ 'top-right'} richColors/>
       </body>
     </html>
   );

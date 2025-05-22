@@ -59,13 +59,12 @@ type Props = {
 
 function TransactionList(props: Props) {
   return (
-    <div className="border-1 rounded-lg my-8">
+    <div className="border-1 rounded-none mx-2 sm:mx-0 sm:rounded-sm my-8">
       <Table>
         <TableHeader>
           <TableRow className="text-right">
             <TableHead>No</TableHead>
             <TableHead>
-
               <SelectAllCheckbox
                 allIds={props.readyTransactionList.map((tx) => tx.id)}
               />
@@ -110,11 +109,10 @@ function TransactionList(props: Props) {
               <TableRow key={tx.id}>
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell className="min-w-[20px]">
-                  
-                  <SelectCheckbox id={ tx.id} />
+                  <SelectCheckbox id={tx.id} />
                 </TableCell>
                 <TableCell>{format(new Date(tx.createdAt), "PPpp")}</TableCell>
-                <TableCell>{tx.description}</TableCell>
+                <TableCell>{tx.description ?? '-'}</TableCell>
                 <TableCell>
                   <Badge
                     style={{ backgroundColor: categoryColors[tx.category] }}
@@ -129,7 +127,7 @@ function TransactionList(props: Props) {
                   } font-medium`}
                 >
                   {tx.type === "EXPENSE" ? "-" : "+"}
-                  {tx.amount}
+                  &#8358;{Number(tx.amount.toFixed(2)).toLocaleString()}
                 </TableCell>
                 <TableCell>
                   {tx.isRecurring ? (
@@ -170,11 +168,12 @@ function TransactionList(props: Props) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem>
-                        <Link href={`/transaction/create?edit=${tx.id}`}>
+                      <Link href={`/transaction/create?edit=${tx.id}`}>
+                        <DropdownMenuItem>
                           <span>Edit</span>
-                        </Link>
-                      </DropdownMenuItem>
+                        </DropdownMenuItem>
+                      </Link>
+
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>
                         <span

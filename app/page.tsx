@@ -10,10 +10,6 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
 
@@ -26,12 +22,15 @@ export default function Home() {
             Manage Your Finances With Intelligence
           </h1>
         </div>
-        <p className="text-gray-700 dark:text-white -mt-6">
+        <p className="text-gray-700 dark:text-white -mt-6 px-2">
           An AI-powered financial management platform that helps you track,
           analyze and optimize your spending with real time insights
         </p>
         <div className="space-x-2">
-          <Button size={"lg"}>Get Started</Button>
+          <Link href={"/dashboard"}>
+            <Button size={"lg"}>Get Started</Button>
+          </Link>
+
           <Button size="lg" variant={"outline"}>
             Watch Demo
           </Button>
@@ -44,7 +43,7 @@ export default function Home() {
 
       <div className="grid bg-blue-50 dark:bg-blue-950/50 py-20 mt-10 grid-cols-2 md:grid-cols-4 gap-8">
         {statsData.map((stat, idx) => (
-          <div key={idx}>
+          <div key={idx} className="px-2">
             <div className="text-3xl font-bold text-blue-600 mb-2">
               {stat.value}
             </div>
@@ -61,13 +60,15 @@ export default function Home() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 container mx-auto gap-8  my-12 text-start">
         {featuresData.map((feature, idx) => (
-          <Card key={idx}>
-            <CardContent className="flex flex-col justify-around gap-4 text-gray-600">
-              {feature.icon}
-              <h3 className="dark:text-gray-50">{feature.title}</h3>
-              <p className="dark:text-gray-400">{feature.description}</p>
-            </CardContent>
-          </Card>
+          <div key={idx} className="px-2">
+            <Card className="h-full">
+              <CardContent className="flex flex-col justify-around gap-4 text-gray-600">
+                {feature.icon}
+                <h3 className="dark:text-gray-50">{feature.title}</h3>
+                <p className="dark:text-gray-400">{feature.description}</p>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
 
@@ -77,7 +78,7 @@ export default function Home() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {howItWorksData.map((step, idx) => (
-            <div key={idx}>
+            <div key={idx} className="px-2">
               <div className="flex flex-col justify-around gap-4 text-gray-600 dark:text-gray-400 items-center">
                 <span className="w-[70px] h-[70px] rounded-full bg-blue-100 inline-flex justify-center items-center">
                   {" "}
@@ -96,28 +97,30 @@ export default function Home() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 container mx-auto my-28 gap-8  text-start">
         {testimonialsData.map((testimony, idx) => (
-          <Card key={idx}>
-            <CardContent className="flex flex-col justify-around gap-4 text-gray-600">
-              <div className="flex gap-2 ">
-                <Image
-                  src={testimony.image}
-                  alt="profile image"
-                  width={50}
-                  height={50}
-                  className="rounded-full"
-                />
-                <section>
-                  <p className="font-bold text-black dark:text-gray-200">
-                    {testimony.name}
-                  </p>
-                  <p className="text-gray-800 dark:text-gray-300">
-                    {testimony.role}
-                  </p>
-                </section>
-              </div>
-              <p className="dark:text-gray-400">{testimony.quote}</p>
-            </CardContent>
-          </Card>
+          <div key={idx} className="px-2">
+            <Card >
+              <CardContent className="flex flex-col justify-around gap-4 text-gray-600">
+                <div className="flex gap-2 ">
+                  <Image
+                    src={testimony.image}
+                    alt="profile image"
+                    width={50}
+                    height={50}
+                    className="rounded-full"
+                  />
+                  <section>
+                    <p className="font-bold text-black dark:text-gray-200">
+                      {testimony.name}
+                    </p>
+                    <p className="text-gray-800 dark:text-gray-300">
+                      {testimony.role}
+                    </p>
+                  </section>
+                </div>
+                <p className="dark:text-gray-400">{testimony.quote}</p>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
 

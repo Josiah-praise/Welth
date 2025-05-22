@@ -3,44 +3,39 @@ import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
 
 export default function AnimatedImage() {
-  const ref = useRef(null);
-  const [inView, setInView] = useState(false);
+
+  const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // entry.boundingClientRect.top will give you the distance from top
-        if (entry.isIntersecting) {
-          setInView(true);
-        } else {
-          setInView(false);
-        }
-      },
-      {
-        root: null, // viewport
-        threshold: 1, // 10% of the element is visible
+    const imageElement = imageRef.current;
+
+    if (!imageElement) return;
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const scrollThreshold = 100;
+
+      if (scrollPosition > scrollThreshold) {
+        imageElement.classList.add("ai-image-scrolled");
+      } else {
+        imageElement.classList.remove("ai-image-scrolled");
       }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => {
-      if (ref.current) observer.unobserve(ref.current);
     };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <div className="ai-image-con">
+    <div className="ai-image-con px-2 md:px-0">
       <Image
-        ref={ref}
+        ref={imageRef}
         src="/images/banner.jpeg"
         alt="Banner"
         width={1280}
         height={720}
         priority
-        className={`ai-image ${inView ? "ai-image-scrolled" : ""}`}
+        className={`ai-image`}
       />
     </div>
   );

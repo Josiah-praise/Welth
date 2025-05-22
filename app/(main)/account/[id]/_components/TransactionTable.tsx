@@ -30,6 +30,7 @@ import { MemoizedTransactionList } from "./TransactionList";
 import { SearchIcon, Trash2Icon, X } from "lucide-react";
 import { useSelection } from "./CheckStateProvider";
 import { Label } from "@/components/ui/label";
+import { BarLoader } from "react-spinners";
 
 type expenseType = "INCOME" | "EXPENSE" | "";
 
@@ -56,6 +57,7 @@ function TransactionTable({
     Array<serializableTransaction>
   >(accountDetails.transactions);
   const searchParams = useSearchParams();
+  const [isDeleting, toggleDeleteState] = useState(false)
   const [searchValue, setSearchValue] = useState(searchParams.get("q") ?? "");
   const [filterState, setFilters] = useState<filterState>({
     type: "",
@@ -67,7 +69,7 @@ function TransactionTable({
     order: "asc",
   });
   const deferredFilterState = useDeferredValue(filterState);
-  // const deferredSortState = useDeferredValue(sortState);
+  const deferredSortState = useDeferredValue(sortState);
   const deferredSearchValue = useDeferredValue(searchValue);
 
   // const debouncedValue = useDebounce(searchValue, 5000);
@@ -124,7 +126,7 @@ function TransactionTable({
 
     // sort the filtered list in asc order
     result.sort((a, b) => {
-      switch (sortState.field) {
+      switch (deferredSortState.field) {
         case "amount":
           const aAmount = a.type === "EXPENSE" ? -a.amount : a.amount;
           const bAmount = b.type === "EXPENSE" ? -b.amount : b.amount;
@@ -140,12 +142,12 @@ function TransactionTable({
       }
     });
 
-    if (sortState.order === "desc") result.reverse();
+    if (deferredSortState.order === "desc") result.reverse();
 
     return result;
   }, [
     deferredSearchValue,
-    sortState,
+    deferredSortState,
     deferredFilterState,
     filteredAndSortedTransactions,
   ]);
@@ -172,6 +174,7 @@ function TransactionTable({
   );
 
   const deleteMultipleTransactions = useCallback(async () => {
+    toggleDeleteState(true)
     const txsCopy = filteredAndSortedTransactions.slice();
     const tempTransactions = txsCopy.filter((tx) => selection.includes(tx.id));
 
@@ -219,6 +222,7 @@ function TransactionTable({
         }}`
       );
     }
+    toggleDeleteState(false)
   }, [filteredAndSortedTransactions, router, selection, setSelection]);
 
   const handleFilter = useCallback(
@@ -253,21 +257,26 @@ function TransactionTable({
 
   return (
     <div>
-      <div className="flex gap-4">
-        <div className="relative flex-1">
+      <BarLoader
+        loading={isDeleting}
+        className="!w-full !block mb-4"
+        color="#cb0101"
+      />
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1 px-2 sm:px-0">
           <SearchIcon
-            className="absolute text-muted-foreground top-[50%] translate-y-[-50%] left-2"
+            className="absolute text-muted-foreground top-[50%] translate-y-[-50%] left-4 sm:left-2"
             size={15}
           />
           <Input
             type={"text"}
             placeholder="search..."
-            className="pl-8"
+            className="pl-8 rounded-sm sm:rounded-md"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 px-2 sm:px-0">
           <Select
             value={filterState.type}
             onValueChange={(value) =>
@@ -282,18 +291,26 @@ function TransactionTable({
               <SelectItem value="EXPENSE">Expense</SelectItem>
             </SelectContent>
           </Select>
-          <Label htmlFor="recurring" className="p-2 border rounded-md flex gap-3 items-center">
-            <span className="text-sm text-muted-foreground">recurring</span>
-            <Switch id="recurring"
-              checked={filterState.recurring}
-              onCheckedChange={(value) => handleFilter("recurring", value)}
-            />
-          </Label>
-          <Label htmlFor="one-time" className="p-2 border rounded-md flex gap-3 items-center">
+          <Label
+            htmlFor="one-time"
+            className="p-2 border rounded-md flex gap-3 items-center"
+          >
             <span className="text-sm text-muted-foreground">one-time</span>
-            <Switch id="one-time"
+            <Switch
+              id="one-time"
               checked={filterState.oneTime}
               onCheckedChange={(value) => handleFilter("oneTime", value)}
+            />
+          </Label>
+          <Label
+            htmlFor="recurring"
+            className="p-2 border rounded-md flex gap-3 items-center"
+          >
+            <span className="text-sm text-muted-foreground">recurring</span>
+            <Switch
+              id="recurring"
+              checked={filterState.recurring}
+              onCheckedChange={(value) => handleFilter("recurring", value)}
             />
           </Label>
           {(filterState.recurring ||
@@ -323,7 +340,7 @@ function TransactionTable({
 
       <MemoizedTransactionList
         readyTransactionList={readyTransactionList}
-        deleteSingleTransaction={deleteSingleTransaction} 
+        deleteSingleTransaction={deleteSingleTransaction}
         handleSortConfig={handleSortConfig}
         sortState={sortState}
         setSortState={setSortState}

@@ -72,7 +72,7 @@ function CreateAccountDrawer({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
 
-      <DrawerContent>
+      <DrawerContent className="px-2">
         <DrawerDescription className="hidden">
           A drawer for account creation
         </DrawerDescription>

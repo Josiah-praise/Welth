@@ -20,8 +20,14 @@ export type notFoundResponse = {
   error?: string
 }
 
+export type tooManyRequestsResponse = {
+  info: "too many requests";
+  error?: string;
+};
+
 export type serverResponse<T = unknown> =
   | notFoundResponse
   | unauthorizedResponse
+  | tooManyRequestsResponse
   | errorResponse
   | successResponse<T>;

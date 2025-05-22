@@ -1,5 +1,6 @@
 import { serverAction } from "@/types/server-action";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type fetchState<T> = {
   data: null | T;
@@ -9,7 +10,9 @@ type fetchState<T> = {
 
 // a function that takes a server action and helps with state management for the server action call for use in client components
 
-export function useFetch<TParam, PResponse = unknown>(callback: serverAction<TParam,PResponse>) {
+export function useFetch<TParam, PResponse = unknown>(
+  callback: serverAction<TParam, PResponse>
+) {
   const [data, setFetchData] = useState<fetchState<PResponse>>({
     data: null,
     error: null,
@@ -24,11 +27,13 @@ export function useFetch<TParam, PResponse = unknown>(callback: serverAction<TPa
       const result = await callback(param);
 
       if (result.info === "successful") {
+        
         setFetchData({
           error: null,
           data: result.data || null,
           loading: false,
         });
+        console.log('step 9')
       } else {
         setFetchData((state) => ({
           ...state,
@@ -36,6 +41,7 @@ export function useFetch<TParam, PResponse = unknown>(callback: serverAction<TPa
 
           loading: false,
         }));
+        toast.error(result.error ?? "Something went wrong on the server");
       }
     } catch (error: unknown) {
       console.error(error);
@@ -44,12 +50,15 @@ export function useFetch<TParam, PResponse = unknown>(callback: serverAction<TPa
         error: (error as any).message || "Something went wrong on the server",
         loading: false,
       }));
+      toast.error(
+        (error as any).message || "Something went wrong on the server"
+      );
     }
   };
 
   const setData = (data: PResponse) => {
     setFetchData((state) => ({ ...state, data }));
   };
-    
-    return {...data, fetch, setData}
+
+  return { ...data, fetch, setData };
 }
