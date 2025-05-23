@@ -103,6 +103,7 @@ export function AddTransactionForm({
           },
   });
 
+  debugger;
   const {
     loading: transactionLoading,
     fetch: transactionFn,
@@ -124,8 +125,9 @@ export function AddTransactionForm({
       amount: data.amount,
     };
 
+    console.log(formData)
     if (editMode) {
-        transactionFn({id: editId, data: formData });
+        transactionFn(formData);
     } else {
       transactionFn(formData);
     }
