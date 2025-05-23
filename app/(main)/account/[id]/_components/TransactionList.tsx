@@ -1,3 +1,5 @@
+"use client";
+
 import { serializableTransaction } from "@/actions/Transactions";
 import { CheckedState } from "@radix-ui/react-checkbox";
 import { filterState, sortState } from "./TransactionTable";
@@ -43,23 +45,14 @@ const RECURRING_INTERVALS = {
 type Props = {
   readyTransactionList: serializableTransaction[];
   deleteSingleTransaction: (id: string) => Promise<void>;
-  // toggleSelection: (id: string) => void;
-  // toggleAllSelection: (value: CheckedState) => void;
-  // handleFilter: (
-  //   filterType: keyof filterState,
-  //   value?: string | boolean
-  // ) => void;
   handleSortConfig: (value: "amount" | "date" | "") => void;
-  // checkAll: Dispatch<SetStateAction<boolean>>;
-  // allChecked: boolean;
   sortState: sortState;
   setSortState: Dispatch<SetStateAction<sortState>>;
-  // selection: string[];
 };
 
 function TransactionList(props: Props) {
   return (
-    <div className="border-1 rounded-none mx-2 sm:mx-0 sm:rounded-sm my-8">
+    <div className="border border-border rounded-none mx-2 sm:mx-0 sm:rounded-sm my-8 bg-background text-foreground">
       <Table>
         <TableHeader>
           <TableRow className="text-right">
@@ -90,8 +83,7 @@ function TransactionList(props: Props) {
               className="cursor-pointer"
             >
               <div className="flex gap-4 items-center">
-                {" "}
-                Amount{" "}
+                Amount
                 {props.sortState.field === "amount" &&
                   (props.sortState.order === "asc" ? (
                     <ChevronUp className="text-muted-foreground w-4 h-4" />
@@ -105,26 +97,30 @@ function TransactionList(props: Props) {
         </TableHeader>
         <TableBody>
           {props.readyTransactionList.length > 0 ? (
-            props.readyTransactionList.slice(0).map((tx, idx) => (
+            props.readyTransactionList.map((tx, idx) => (
               <TableRow key={tx.id}>
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell className="min-w-[20px]">
                   <SelectCheckbox id={tx.id} />
                 </TableCell>
                 <TableCell>{format(new Date(tx.createdAt), "PPpp")}</TableCell>
-                <TableCell>{tx.description ?? '-'}</TableCell>
+                <TableCell>{tx.description ?? "-"}</TableCell>
                 <TableCell>
                   <Badge
-                    style={{ backgroundColor: categoryColors[tx.category] }}
+                    className="text-white"
+                    style={{
+                      backgroundColor: categoryColors[tx.category],
+                    }}
                   >
                     {tx.category}
                   </Badge>
                 </TableCell>
-
                 <TableCell
-                  className={`${
-                    tx.type === "EXPENSE" ? "text-red-500" : "text-green-500"
-                  } font-medium`}
+                  className={`font-medium ${
+                    tx.type === "EXPENSE"
+                      ? "text-red-500 dark:text-red-400"
+                      : "text-green-500 dark:text-green-400"
+                  }`}
                 >
                   {tx.type === "EXPENSE" ? "-" : "+"}
                   &#8358;{Number(tx.amount.toFixed(2)).toLocaleString()}
@@ -134,11 +130,10 @@ function TransactionList(props: Props) {
                     <MoreInfoToolTip
                       trigger={
                         <Badge
-                          variant={"secondary"}
-                          className="bg-purple-200 cursor-pointer hover:bg-purple-300"
+                          variant="secondary"
+                          className="bg-purple-200 dark:bg-purple-400 text-purple-900 dark:text-white cursor-pointer hover:bg-purple-300 dark:hover:bg-purple-500"
                         >
-                          <RefreshCcw />
-
+                          <RefreshCcw className="mr-1 h-4 w-4" />
                           {tx.recurringInterval &&
                             RECURRING_INTERVALS[tx.recurringInterval]}
                         </Badge>
@@ -154,8 +149,8 @@ function TransactionList(props: Props) {
                       }
                     />
                   ) : (
-                    <Badge variant={"secondary"}>
-                      <Clock />
+                    <Badge variant="secondary">
+                      <Clock className="mr-1 h-4 w-4" />
                       one-time
                     </Badge>
                   )}
@@ -163,23 +158,19 @@ function TransactionList(props: Props) {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant={"ghost"}>
+                      <Button variant="ghost">
                         <MoreHorizontal />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <Link href={`/transaction/create?edit=${tx.id}`}>
-                        <DropdownMenuItem>
-                          <span>Edit</span>
-                        </DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
                       </Link>
-
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <span
-                          className="text-red-500"
-                          onClick={() => props.deleteSingleTransaction(tx.id)}
-                        >
+                      <DropdownMenuItem
+                        onClick={() => props.deleteSingleTransaction(tx.id)}
+                      >
+                        <span className="text-red-500 dark:text-red-400">
                           Delete
                         </span>
                       </DropdownMenuItem>
@@ -191,10 +182,9 @@ function TransactionList(props: Props) {
           ) : (
             <TableRow>
               <TableCell
-                colSpan={7}
+                colSpan={8}
                 className="text-center text-muted-foreground"
               >
-                {" "}
                 No transaction
               </TableCell>
             </TableRow>
@@ -204,4 +194,5 @@ function TransactionList(props: Props) {
     </div>
   );
 }
+
 export const MemoizedTransactionList = React.memo(TransactionList);

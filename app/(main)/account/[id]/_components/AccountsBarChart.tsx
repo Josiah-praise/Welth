@@ -1,15 +1,17 @@
 "use client";
 
 import { serializableTransaction } from "@/actions/Transactions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { endOfDay, format, startOfDay, subDays } from "date-fns";
 import { useMemo, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   BarChart,
   Bar,
@@ -22,24 +24,21 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const DATE_RANGES: Record<string, {label: string, days: number}> = {
+const DATE_RANGES: Record<string, { label: string; days: number }> = {
   "7D": { label: "Last 7 Days", days: 7 },
   "1M": { label: "Last Month", days: 30 },
   "3M": { label: "Last 3 Months", days: 90 },
   "6M": { label: "Last 6 Months", days: 180 },
-  ALL: { label: "All Time", days: -1 },
+  ALL: { label: "All Time", days: 0 },
 };
-
-// type dateRangeStateType = "1M" | "3M" | "6M" | "7D" | "ALL";
-
-// type groupedTransactions = {
-//   [key: string]: { income: number; expense: number };
-// };
 
 type props = { transactions: serializableTransaction[] };
 
 function AccountsBarChart({ transactions }: props) {
   const [dateRange, setDateRange] = useState<string>("7D");
+  const { resolvedTheme } = useTheme();
+
+  const labelColor = resolvedTheme === "dark" ? "#D1D5DB" : "#4B5563"; // Tailwind gray-300 for dark, gray-700 for light
 
   const {
     data,
@@ -55,18 +54,15 @@ function AccountsBarChart({ transactions }: props) {
       return tx.date > startDate && tx.date < endOfDay(today);
     });
 
-    // group transactions
     const groupedTransactions = filteredTransactions.reduce<
       Record<string, { income: number; expense: number }>
     >((acc, tx) => {
       const formattedDate = format(tx.date, "MMM-d");
 
-      // Step 1: Make sure we have a record for that date
       if (!acc[formattedDate]) {
         acc[formattedDate] = { income: 0, expense: 0 };
       }
 
-      // Step 2: Add the amount based on type
       if (tx.type === "INCOME") {
         acc[formattedDate].income += tx.amount;
       } else if (tx.type === "EXPENSE") {
@@ -76,7 +72,6 @@ function AccountsBarChart({ transactions }: props) {
       return acc;
     }, {});
 
-    // create your appropriate data format for the chart
     const data = Object.entries(groupedTransactions).map(
       ([key, { income, expense }]) => ({
         name: key,
@@ -95,7 +90,6 @@ function AccountsBarChart({ transactions }: props) {
         } else if (tx.type === "EXPENSE") {
           acc.expense += tx.amount;
         }
-
         return acc;
       },
       { income: 0, expense: 0 }
@@ -104,14 +98,14 @@ function AccountsBarChart({ transactions }: props) {
     return { data, grossIncomeAndExpense };
   }, [dateRange, transactions]);
 
-  console.log(data);
-
   return (
     <div className="mx-2 sm:mx-0">
-      <Card className="my-8 rounded-none sm:rounded-md">
+      <Card className="my-8 rounded-none sm:rounded-md bg-background text-foreground">
         <CardHeader className="space-y-3 sm:space-y-9">
           <CardTitle className="flex flex-col gap-2 sm:gap-0 sm:flex-row justify-between">
-            <h3 className="text-sm sm:text-base">Transaction Overview</h3>
+            <h3 className="text-sm sm:text-base text-foreground">
+              Transaction Overview
+            </h3>
             <Select
               value={dateRange}
               onValueChange={(value) => setDateRange(value)}
@@ -128,29 +122,30 @@ function AccountsBarChart({ transactions }: props) {
               </SelectContent>
             </Select>
           </CardTitle>
-          {/* <CardDescription>Card Description</CardDescription> */}
-          <div className="flex sm:flex-row flex-col sm:items-center sm:justify-around  ">
+
+          <div className="flex sm:flex-row flex-col sm:items-center sm:justify-around">
             <div className="flex sm:flex-col sm:items-center justify-between">
               <span className="text-muted-foreground">Total Income</span>
-              <span className="sm:text-2xl font-semibold text-green-500">
+              <span className="sm:text-2xl font-semibold text-green-500 dark:text-green-400">
                 &#8358;{Number(income.toFixed(2)).toLocaleString()}
               </span>
             </div>
             <div className="flex sm:flex-col sm:items-center justify-between sm:justify-center">
               <span className="text-muted-foreground">Total Expense</span>
-              <span className="sm:text-2xl font-semibold text-red-500">
-                &#8358;
-                {Number(expense.toFixed(2)).toLocaleString()}
+              <span className="sm:text-2xl font-semibold text-red-500 dark:text-red-400">
+                &#8358;{Number(expense.toFixed(2)).toLocaleString()}
               </span>
             </div>
             <div className="flex sm:flex-col sm:items-center justify-between sm:justify-center">
               <span className="text-muted-foreground">Net Flow</span>
               <span
                 className={`sm:text-2xl font-semibold ${
-                  income - expense < 0 ? "text-red-500" : "text-green-500"
+                  income - expense < 0
+                    ? "text-red-500 dark:text-red-400"
+                    : "text-green-500 dark:text-green-400"
                 }`}
               >
-                {income - expense > 0 || income - expense === 0? "+" : "-"}&#8358;
+                {income - expense >= 0 ? "+" : "-"}&#8358;
                 {Math.abs(income - expense).toFixed(2)}
               </span>
             </div>
@@ -159,15 +154,8 @@ function AccountsBarChart({ transactions }: props) {
         <CardContent className="w-full h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              width={500}
-              height={300}
               data={data}
-              margin={{
-                top: 10,
-                right: 30,
-                left: 20,
-                bottom: 20,
-              }}
+              margin={{ top: 10, right: 30, left: 20, bottom: 20 }}
               barGap={8}
               barCategoryGap={20}
             >
@@ -196,13 +184,13 @@ function AccountsBarChart({ transactions }: props) {
                 dataKey="name"
                 tickLine={false}
                 axisLine={{ stroke: "#e5e7eb" }}
-                tick={{ fill: "#6b7280", fontSize: 12 }}
+                tick={{ fill: labelColor, fontSize: 12 }}
                 dy={10}
               />
               <YAxis
                 tickLine={false}
                 axisLine={{ stroke: "#e5e7eb" }}
-                tick={{ fill: "#6b7280", fontSize: 12 }}
+                tick={{ fill: labelColor, fontSize: 12 }}
                 width={60}
               />
               <Tooltip
@@ -212,9 +200,13 @@ function AccountsBarChart({ transactions }: props) {
                   border: "none",
                   boxShadow:
                     "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                  backgroundColor: "#ffffff",
+                  backgroundColor: "var(--background)",
+                  color: "var(--foreground)",
                 }}
-                labelStyle={{ fontWeight: "bold", color: "#374151" }}
+                labelStyle={{
+                  fontWeight: "bold",
+                  color: "var(--foreground)",
+                }}
                 formatter={(value, name) => [
                   `₦${value.toLocaleString()}`,
                   name,
@@ -252,4 +244,5 @@ function AccountsBarChart({ transactions }: props) {
     </div>
   );
 }
+
 export default AccountsBarChart;

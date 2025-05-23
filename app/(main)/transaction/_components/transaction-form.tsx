@@ -103,7 +103,6 @@ export function AddTransactionForm({
           },
   });
 
-  debugger;
   const {
     loading: transactionLoading,
     fetch: transactionFn,

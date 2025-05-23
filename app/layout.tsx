@@ -32,8 +32,8 @@ export default function RootLayout({
               <Header />
             </header>
             <main className="mt-[100px] min-h-screen">{children}</main>
-            <footer className="text-center dark:bg-gray-900 bg-gray-300/50">
-              <p className="container mx-auto py-10 ">
+            <footer className="text-center dark:bg-gray-900 bg-gray-300/50 mt-5">
+              <p className="container mx-auto py-5 ">
                 Made with love by Praise
               </p>
             </footer>

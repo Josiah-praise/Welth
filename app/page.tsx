@@ -28,7 +28,9 @@ export default function Home() {
         </p>
         <div className="space-x-2">
           <Link href={"/dashboard"}>
-            <Button size={"lg"}>Get Started</Button>
+            <Button className="cursor-pointer" size={"lg"}>
+              Get Started
+            </Button>
           </Link>
 
           <Button size="lg" variant={"outline"}>
@@ -98,7 +100,7 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-3 container mx-auto my-28 gap-8  text-start">
         {testimonialsData.map((testimony, idx) => (
           <div key={idx} className="px-2">
-            <Card >
+            <Card>
               <CardContent className="flex flex-col justify-around gap-4 text-gray-600">
                 <div className="flex gap-2 ">
                   <Image
@@ -133,12 +135,14 @@ export default function Home() {
           Welth
         </p>
 
-        <Button
-          size={"lg"}
-          className="bg-accent p-6 hover:cursor-pointer mt-8 font-semibold text-accent-foreground animate-bounce hover:text-blue-600"
-        >
-          <Link href="/dashboard">Get Started</Link>
-        </Button>
+        <Link href="/dashboard">
+          <Button
+            size={"lg"}
+            className="bg-accent p-6 hover:cursor-pointer mt-8 font-semibold text-accent-foreground animate-bounce hover:text-blue-600"
+          >
+            Get Started
+          </Button>
+        </Link>
       </div>
     </div>
   );

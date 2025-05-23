@@ -21,8 +21,8 @@ async function Accounts({
       {isSuccessResponse(accounts) &&
         accounts.data &&
         isAccountsResponse(accounts.data) &&
-        accounts.data.map((account, idx) => (
-          <AccountCard key={idx} id={idx} data={account} />
+        accounts.data.map((account) => (
+          <AccountCard key={account.id} id={account.id} data={account} />
         ))}
     </>
   );

@@ -334,3 +334,38 @@ export const getAccountWithTransaction: serverAction<
     };
   }
 };
+
+export const deleteAccount: serverAction<string, void> = async (accountId) => {
+  if (!accountId) return {info: "error", error: "accountId is required" };
+
+  try {
+    const { userId } = await auth();
+    if (!userId) return {info: "unauthorized" };
+
+    const prismaUser = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!prismaUser) return {info: "unauthorized" };
+
+    const account = await db.account.findUnique({
+      where: { id: accountId },
+    });
+
+    // Confirm ownership before deletion
+    if (!account || account.userId !== prismaUser.id) return {info: "not found" , error: "Account not found" };
+
+    await db.account.delete({
+      where: { id: accountId },
+    });
+
+    revalidatePath("/dashboard");
+    return { info: "successful" };
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    return {
+      info: "error",
+      error: (error as any).message || "Error deleting account",
+    };
+  }
+};
