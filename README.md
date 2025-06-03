@@ -20,12 +20,9 @@ It features a robust authentication system powered by Clerk (with Google SSO sup
 
 ## 🖼️ Screenshots
 
-> _Add your UI screenshots here_
 
-<!--
-![Dashboard](./public/images/dashboard.png)
-![Budgets](./public/images/budget.png)
--->
+![Dashboard](./public/images/dashboard-dark.png)
+![Transactions](./public/images/accounts-dark.png)
 
 ---
 

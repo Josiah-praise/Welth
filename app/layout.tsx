@@ -28,7 +28,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ClerkThemeProvider>
-            <header className="border-b fixed py-6 left-0 right-0 top-0 backdrop-blur-sm z-900 shadow-sm">
+            <header className="border-b fixed py-2 left-0 right-0 top-0 backdrop-blur-sm z-900 shadow-sm">
               <Header />
             </header>
             <main className="mt-[100px] min-h-screen">{children}</main>
