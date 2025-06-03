@@ -78,8 +78,8 @@ GEMINI_API_KEY=***************
 1. Clone the repo
 ``` bash
 
-git clone https://github.com/yourusername/welth.git
-cd welth
+git clone https://github.com/josiah-praise/Welth.git
+cd Welth
 ```
 
 
