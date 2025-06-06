@@ -117,8 +117,8 @@ function TransactionTable({
           return aAmount - bAmount;
           break;
         case "date":
-          const aDate = new Date(a.createdAt);
-          const bDate = new Date(b.createdAt);
+          const aDate = new Date(a.date);
+          const bDate = new Date(b.date);
           return aDate.getTime() - bDate.getTime();
           break;
         default:
