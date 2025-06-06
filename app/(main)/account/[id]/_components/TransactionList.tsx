@@ -1,8 +1,6 @@
 "use client";
 
 import { serializableTransaction } from "@/actions/Transactions";
-import { CheckedState } from "@radix-ui/react-checkbox";
-import { filterState, sortState } from "./TransactionTable";
 import {
   Table,
   TableBody,
@@ -103,7 +101,7 @@ function TransactionList(props: Props) {
                 <TableCell className="min-w-[20px]">
                   <SelectCheckbox id={tx.id} />
                 </TableCell>
-                <TableCell>{format(new Date(tx.createdAt), "PPpp")}</TableCell>
+                <TableCell>{format(new Date(tx.date), "PPpp")}</TableCell>
                 <TableCell>{tx.description ?? "-"}</TableCell>
                 <TableCell>
                   <Badge

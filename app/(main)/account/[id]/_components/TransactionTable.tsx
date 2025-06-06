@@ -57,7 +57,7 @@ function TransactionTable({
     Array<serializableTransaction>
   >(accountDetails.transactions);
   const searchParams = useSearchParams();
-  const [isDeleting, toggleDeleteState] = useState(false)
+  const [isDeleting, toggleDeleteState] = useState(false);
   const [searchValue, setSearchValue] = useState(searchParams.get("q") ?? "");
   const [filterState, setFilters] = useState<filterState>({
     type: "",
@@ -163,46 +163,23 @@ function TransactionTable({
       if (result?.info === "successful") {
         setSelection([]);
         router.refresh();
-        toast.error("transaction deleted");
+        toast.success("transaction deleted");
       } else {
         if (tempTransaction)
           setTransactions((prev) => [...prev, tempTransaction]);
         toast.warning("failed to delete transaction");
       }
     },
-    [filteredAndSortedTransactions, router]
+    [filteredAndSortedTransactions, router, setSelection]
   );
 
   const deleteMultipleTransactions = useCallback(async () => {
-    toggleDeleteState(true)
-    const txsCopy = filteredAndSortedTransactions.slice();
+    toggleDeleteState(true);
+    const txsCopy = filteredAndSortedTransactions
+      .slice()
+      .filter((tx) => !selection.includes(tx.id));
     const tempTransactions = txsCopy.filter((tx) => selection.includes(tx.id));
 
-    // remove every element in the selection array from the copy
-    selection.forEach((id, idx) => {
-      // get transaction an index
-      const tx = txsCopy.reduce(
-        (
-          acc: { idx: number | null; t: serializableTransaction | null },
-          tx,
-          idx
-        ) => {
-          if (tx.id === id) {
-            acc.t = tx;
-            acc.idx = idx;
-          }
-          return acc;
-        },
-        { idx: null, t: null }
-      );
-
-      console.log(`Tx ${tx.t} at index ${tx.idx} is to be deleted`);
-
-      // remove transaction from copy
-      if (tx.idx && tx.t) {
-        txsCopy.splice(tx.idx, 1);
-      }
-    });
 
     setTransactions(txsCopy);
     const result = await deleteTransactions(selection);
@@ -222,7 +199,7 @@ function TransactionTable({
         }}`
       );
     }
-    toggleDeleteState(false)
+    toggleDeleteState(false);
   }, [filteredAndSortedTransactions, router, selection, setSelection]);
 
   const handleFilter = useCallback(
