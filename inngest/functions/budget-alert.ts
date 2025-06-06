@@ -196,7 +196,7 @@ export const generateMonthlyReports = inngest.createFunction(
         });
 
         // Generate AI insights
-        const insights = await generateFinancialInsights(stats, monthName);
+        const insights = await generateFinancialInsights(monthName, stats);
 
         await sendEmail({
           to: user.email,
