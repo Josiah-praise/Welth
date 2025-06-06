@@ -136,7 +136,7 @@ export function DashboardOverview({ accounts, transactions }) {
                         ) : (
                           <ArrowUpRight className="mr-1 h-4 w-4" />
                         )}
-                        ${transaction.amount.toFixed(2)}
+                        ₦{transaction.amount.toFixed(2)}
                       </div>
                     </div>
                   </div>
@@ -179,8 +179,7 @@ export function DashboardOverview({ accounts, transactions }) {
                             }}
                           />
                           <span>
-                            {entry.name}: &#8358;
-                            {(entry.value as number).toFixed(2)}
+                            {entry.name}: ₦{(entry.value as number).toFixed(2)}
                           </span>
                         </div>
                       ))}
@@ -207,7 +206,7 @@ export function DashboardOverview({ accounts, transactions }) {
                         </Pie>
                         <Tooltip
                           formatter={(value) =>
-                            `&#8358;${(value as number).toFixed(2)}`
+                            `₦${(value as number).toFixed(2)}`
                           }
                           contentStyle={{
                             backgroundColor: "hsl(var(--popover))",
@@ -232,7 +231,7 @@ export function DashboardOverview({ accounts, transactions }) {
                         fill="#8884d8"
                         dataKey="value"
                         label={({ name, value }) =>
-                          `${name}: &#8358;${(value as number).toFixed(2)}`
+                          `${name}: ₦${(value as number).toFixed(2)}`
                         }
                       >
                         {pieChartData.map((entry, index) => (
@@ -244,7 +243,7 @@ export function DashboardOverview({ accounts, transactions }) {
                       </Pie>
                       <Tooltip
                         formatter={(value) =>
-                          `&#8358;${(value as number).toFixed(2)}`
+                          `₦${(value as number).toFixed(2)}`
                         }
                         contentStyle={{
                           backgroundColor: "hsl(var(--popover))",
