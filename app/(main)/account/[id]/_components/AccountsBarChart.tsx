@@ -146,7 +146,7 @@ function AccountsBarChart({ transactions }: props) {
                 }`}
               >
                 {income - expense >= 0 ? "+" : "-"}&#8358;
-                {Math.abs(income - expense).toFixed(2)}
+                {Number(Math.abs(income - expense).toFixed(2)).toLocaleString()}
               </span>
             </div>
           </div>
