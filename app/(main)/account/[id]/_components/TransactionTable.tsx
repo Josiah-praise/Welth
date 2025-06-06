@@ -168,7 +168,7 @@ function TransactionTable({
     const result = await deleteTransactions(selection);
     if (result?.info === "successful") {
       setSelection([]);
-      toast.error(
+      toast.success(
         `${
           tempTransactions.length > 1 ? "transactions" : "transaction"
         } deleted`
