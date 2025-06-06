@@ -56,9 +56,9 @@ function TransactionTable({
   const [filteredAndSortedTransactions, setTransactions] = useState<
     Array<serializableTransaction>
   >(accountDetails.transactions);
-  const searchParams = useSearchParams();
+  
   const [isDeleting, toggleDeleteState] = useState(false);
-  const [searchValue, setSearchValue] = useState(searchParams.get("q") ?? "");
+  const [searchValue, setSearchValue] = useState("");
   const [filterState, setFilters] = useState<filterState>({
     type: "",
     recurring: false,
@@ -70,22 +70,6 @@ function TransactionTable({
   });
   const deferredFilterState = useDeferredValue(filterState);
   const deferredSortState = useDeferredValue(sortState);
-  const deferredSearchValue = useDeferredValue(searchValue);
-
-  // const debouncedValue = useDebounce(searchValue, 5000);
-
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-
-    if (deferredSearchValue) {
-      if (deferredSearchValue === params.get("q")) return;
-      params.set("q", deferredSearchValue);
-    } else {
-      params.delete("q");
-    }
-
-    router.replace(`?${params.toString()}`);
-  }, [deferredSearchValue, router, searchParams]);
 
   const readyTransactionList = useMemo(() => {
     let result;
@@ -94,8 +78,8 @@ function TransactionTable({
       (tx) =>
         tx.description
           ?.toLocaleLowerCase()
-          .includes(deferredSearchValue.toLowerCase()) ||
-        tx.category.toLowerCase().includes(deferredSearchValue.toLowerCase())
+          .includes(searchValue.toLowerCase()) ||
+        tx.category.toLowerCase().includes(searchValue.toLowerCase())
     );
 
     console.log(deferredFilterState);
@@ -146,7 +130,7 @@ function TransactionTable({
 
     return result;
   }, [
-    deferredSearchValue,
+    searchValue,
     deferredSortState,
     deferredFilterState,
     filteredAndSortedTransactions,
@@ -179,7 +163,6 @@ function TransactionTable({
       .slice()
       .filter((tx) => !selection.includes(tx.id));
     const tempTransactions = txsCopy.filter((tx) => selection.includes(tx.id));
-
 
     setTransactions(txsCopy);
     const result = await deleteTransactions(selection);
