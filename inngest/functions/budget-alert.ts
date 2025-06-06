@@ -186,7 +186,7 @@ export const generateMonthlyReports = inngest.createFunction(
     });
 
     for (const user of users) {
-      await step.run(`generate-report-${user.id}`, async () => {
+      await step.run(`generate-report-${user.email}`, async () => {
         const lastMonth = new Date();
         lastMonth.setMonth(lastMonth.getMonth() - 1);
 
@@ -211,6 +211,8 @@ export const generateMonthlyReports = inngest.createFunction(
             },
           }),
         });
+
+        return stats;
       });
     }
 
